@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Player Gamificado - Melhoria Pessoal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    <style>
+        /* Adicionando alguns estilos específicos para garantir a funcionalidade */
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .d-none {
+            display: none !important;
+        }
+        
+        .mt-1 { margin-top: 8px; }
+        .mt-2 { margin-top: 16px; }
+        .mt-3 { margin-top: 24px; }
+        .mt-4 { margin-top: 32px; }
+        
+        /* Corrigindo z-index para overlays */
+        .modal-overlay {
+            z-index: 10000;
+        }
+        
+        .feedback {
+            z-index: 11000;
+        }
+        
+        /* Ajuste para indicador de tabs */
+        .tab-indicator span {
+            cursor: pointer;
+        }
+        
+        /* Ajuste para garantir que os botões de navegação de data sejam clicáveis */
+        .date-nav-btn {
+            cursor: pointer;
+            z-index: 10;
+            position: relative;
+        }
+        
+        /* Garantir que o app-container tenha posição relativa */
+        .app-container {
+            position: relative;
+        }
+        
+        /* Ajuste para elementos de lista */
+        .list-item {
+            position: relative;
+        }
+        
+        /* Ajuste para botões pequenos */
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+        
+        /* Ajuste para empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        /* Ajuste para input type date no dark mode */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.7;
+        }
+        
+        /* Ajuste para select no dark mode */
+        .form-select {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        /* Ajuste para garantir visibilidade dos botões */
+        .btn-danger {
+            background: linear-gradient(45deg, var(--shogun-red), #b30000);
+            color: var(--cyber-white);
+            border: 1px solid var(--shogun-red);
+        }
+        
+        /* Ajuste para modal body */
+        .modal-body {
+            padding: 25px;
+        }
+        
+        /* Ajuste para guided options */
+        .guided-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        /* Ajuste para dropdown de atributos */
+        #new-habit-attribute option {
+            background: #000;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Gradiente SVG para o anel de progresso -->
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:var(--shogun-red);stop-opacity:1" />
+                <stop offset="50%" style="stop-color:var(--neon-blue);stop-opacity:1" />
+                <stop offset="100%" style="stop-color:var(--kimono-gold);stop-opacity:1" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="app-container">
+        <!-- Cabeçalho -->
+        <header class="app-header cyber-header">
+            <h1><i class="fas fa-gamepad"></i> Player Gamificado</h1>
+            <p>Transforme hábitos em conquistas diárias</p>
+            <div class="tab-indicator">
+                <span class="active" data-tab="home" onclick="switchScreen('home')"></span>
+                <span data-tab="setup" onclick="switchScreen('setup')"></span>
+                <span data-tab="log" onclick="switchScreen('log')"></span>
+            </div>
+        </header>
+
+        <!-- Tela 1: Home (Dashboard) -->
+        <div id="home-screen" class="screen active">
+            <!-- Status do jogador -->
+            <div class="player-status">
+                <div class="player-info">
+                    <div class="player-name" id="player-display-name">Jogador</div>
+                    <div class="player-level">Nível <span id="current-level">1</span></div>
+                </div>
+                <div class="xp-progress">
+                    <div class="xp-bar">
+                        <div class="xp-fill" id="level-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="xp-info">
+                        <span><span id="current-xp">0</span> XP</span>
+                        <span><span id="next-level-xp">100</span> XP para próximo nível</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seletor de data -->
+            <div class="date-selector">
+                <button class="date-nav-btn" id="prev-date">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="date-display">
+                    <div class="current-date" id="current-date-display">Hoje</div>
+                    <div class="date-info" id="date-info">Selecione uma data</div>
+                </div>
+                <button class="date-nav-btn" id="next-date">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Streaks -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-fire"></i> Streaks</h2>
+                </div>
+                <div class="streaks-container">
+                    <div class="streak-card">
+                        <div class="streak-value" id="global-streak">0</div>
+                        <div class="streak-label">Global</div>
+                    </div>
+                    <div class="streak-card">
+                        <div class="streak-value" id="total-points">0</div>
+                        <div class="streak-label">Pontos Hoje</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hábitos do dia -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-tasks"></i> Hábitos de Hoje</h2>
+                    <div class="progress-ring">
+                        <svg class="progress-ring-circle" width="60" height="60">
+                            <circle class="progress-ring-bg" cx="30" cy="30" r="24"></circle>
+                            <circle class="progress-ring-fill" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8"></circle>
+                        </svg>
+                        <div class="progress-ring-text" id="habits-progress">0%</div>
+                    </div>
+                </div>
+                <div id="daily-habits-container">
+                    <!-- Hábitos serão carregados aqui -->
+                    <div class="empty-state">
+                        <i class="fas fa-plus-circle"></i>
+                        <h3>Nenhum hábito configurado</h3>
+                        <p>Vá para "Configuração" para criar seus primeiros hábitos</p>
+                        <button class="btn btn-primary" id="go-to-setup">Criar Hábitos</button>
+                    </div>
+                </div>
+                <button class="btn btn-success mt-2" id="save-daily">
+                    <i class="fas fa-save"></i> Salvar Progresso
+                </button>
+            </div>
+
+            <!-- Modo guiado -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-compass"></i> Comece Aqui</h2>
+                </div>
+                <p style="margin-bottom: 16px;">Novo no sistema? Comece com sugestões personalizadas:</p>
+                <button class="btn btn-outline" id="start-guided-mode">
+                    <i class="fas fa-magic"></i> Modo Guiado
+                </button>
+            </div>
+        </div>
+
+        <!-- Tela 2: Configuração -->
+        <div id="setup-screen" class="screen">
+            <!-- Seção de perfil -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-user"></i> Seu Perfil</h2>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="player-name">Nome do Jogador</label>
+                    <input type="text" class="form-input" id="player-name" placeholder="Digite seu nome">
+                </div>
+                <button class="btn btn-primary" id="save-player-name">
+                    <i class="fas fa-check"></i> Salvar Nome
+                </button>
+            </div>
+
+            <!-- Atributos -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-layer-group"></i> Atributos</h2>
+                    <span class="badge" id="mandatory-count">0/3 obrigatórios</span>
+                </div>
+                <p style="margin-bottom: 16px; color: var(--gray); font-size: 0.9rem;">
+                    Mínimo 3 atributos obrigatórios, máximo 5. Opcionais não geram pontos.
+                </p>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new-attribute-name">Novo Atributo</label>
+                    <input type="text" class="form-input" id="new-attribute-name" placeholder="Ex: CORPO, MENTE">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new-attribute-type">Tipo</label>
+                    <select class="form-select" id="new-attribute-type">
+                        <option value="mandatory">Obrigatório (gera pontos)</option>
+                        <option value="optional">Opcional (sem pontos)</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-success" id="add-attribute">
+                    <i class="fas fa-plus"></i> Adicionar Atributo
+                </button>
+
+                <div id="attributes-list" class="mt-3">
+                    <!-- Lista de atributos será carregada aqui -->
+                    <div class="empty-state" id="no-attributes-message">
+                        <i class="fas fa-layer-group"></i>
+                        <h3>Nenhum atributo criado</h3>
+                        <p>Crie seu primeiro atributo para começar</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hábitos -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-tasks"></i> Hábitos</h2>
+                </div>
+                <p style="margin-bottom: 16px; color: var(--gray); font-size: 0.9rem;">
+                    Crie hábitos associados aos atributos. Pontos são calculados automaticamente.
+                </p>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new-habit-name">Novo Hábito</label>
+                    <input type="text" class="form-input" id="new-habit-name" placeholder="Ex: Beber 2L de água">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new-habit-attribute">Atributo Associado</label>
+                    <select class="form-select" id="new-habit-attribute">
+                        <!-- Opções serão preenchidas dinamicamente -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="new-habit-type">Tipo</label>
+                    <select class="form-select" id="new-habit-type">
+                        <option value="binary">Binário (feito/não feito) - 10 pontos</option>
+                        <option value="quantitative">Quantitativo (valor numérico) - 1 ponto/unidade</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="habit-target-container">
+                    <label class="form-label" for="new-habit-target">Meta Diária</label>
+                    <input type="number" class="form-input" id="new-habit-target" min="1" value="1">
+                    <small style="color: var(--gray); font-size: 0.85rem;">Para hábitos binários: 1 = feito</small>
+                </div>
+                
+                <button class="btn btn-success" id="add-habit">
+                    <i class="fas fa-plus"></i> Adicionar Hábito
+                </button>
+
+                <div id="habits-list" class="mt-3">
+                    <!-- Lista de hábitos será carregada aqui -->
+                    <div class="empty-state" id="no-habits-message">
+                        <i class="fas fa-tasks"></i>
+                        <h3>Nenhum hábito criado</h3>
+                        <p>Crie seu primeiro hábito para começar a registrar</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela 3: Log -->
+        <div id="log-screen" class="screen">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-file-code"></i> Gerar Log</h2>
+                </div>
+                <p style="margin-bottom: 16px;">
+                    Gere um log JSON do seu progresso diário para enviar ao Principal.
+                </p>
+                
+                <div class="form-group">
+                    <label class="form-label" for="log-date">Data do Log</label>
+                    <input type="date" class="form-input" id="log-date" max="">
+                </div>
+                
+                <button class="btn btn-primary" id="generate-log">
+                    <i class="fas fa-cogs"></i> Gerar Log
+                </button>
+
+                <div id="log-output-container" class="mt-3" style="display: none;">
+                    <label class="form-label">Log Gerado (JSON)</label>
+                    <div class="log-output" id="log-output"></div>
+                    <button class="btn btn-success" id="copy-log">
+                        <i class="fas fa-copy"></i> Copiar Log
+                    </button>
+                    <button class="btn btn-outline mt-1" id="share-log">
+                        <i class="fas fa-share-alt"></i> Compartilhar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Histórico -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-history"></i> Histórico</h2>
+                </div>
+                <div id="history-list">
+                    <!-- Histórico será carregado aqui -->
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h3>Nenhum registro histórico</h3>
+                        <p>Registre seus hábitos diários para ver o histórico aqui</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu de navegação inferior -->
+        <nav class="nav-tabs">
+            <a href="#" class="nav-tab active" data-screen="home">
+                <i class="fas fa-home"></i>
+                <span class="tab-label">Início</span>
+            </a>
+            <a href="#" class="nav-tab" data-screen="setup">
+                <i class="fas fa-cog"></i>
+                <span class="tab-label">Configuração</span>
+            </a>
+            <a href="#" class="nav-tab" data-screen="log">
+                <i class="fas fa-file-alt"></i>
+                <span class="tab-label">Log</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Modal de Modo Guiado -->
+    <div id="guided-modal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-magic"></i> Modo Guiado
+                </h3>
+                <button class="modal-close" id="close-guided-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Selecione a área que você gostaria de melhorar primeiro:</p>
+                
+                <div class="guided-options mt-3">
+                    <button class="btn btn-outline guided-option" data-area="CORPO">
+                        <i class="fas fa-heartbeat"></i> Corpo
+                    </button>
+                    <button class="btn btn-outline guided-option" data-area="MENTE">
+                        <i class="fas fa-brain"></i> Mente
+                    </button>
+                    <button class="btn btn-outline guided-option" data-area="ORGANIZACAO">
+                        <i class="fas fa-calendar-check"></i> Organização
+                    </button>
+                    <button class="btn btn-outline guided-option" data-area="RELACIONAMENTOS">
+                        <i class="fas fa-users"></i> Relacionamentos
+                    </button>
+                </div>
+                
+                <div id="guided-result" class="mt-3" style="display: none;">
+                    <div class="card">
+                        <div id="guided-suggestion"></div>
+                        <p class="motivational-phrase mt-2" id="motivational-phrase"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Toast -->
+    <div id="feedback-toast" class="feedback d-none">
+        <div class="feedback-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="feedback-content" id="feedback-message">Mensagem de feedback</div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ============================================
+        // CONSTANTES DO SISTEMA
+        // ============================================
+        const CONFIG = {
+            BINARY_HABIT_POINTS: 10,
+            QUANTITATIVE_POINTS_PER_UNIT: 1,
+            MAX_POINTS_PER_ATTRIBUTE: 50,
+            MAX_POINTS_PER_DAY: 200,
+            BASE_LEVEL_XP: 100,
+            LEVEL_MULTIPLIER: 1.5,
+            MAX_MANDATORY_ATTRIBUTES: 5,
+            MIN_MANDATORY_ATTRIBUTES: 3,
+            GUIDED_LOCK_DAYS: 5
+        };
+
+        const MOTIVATIONAL_PHRASES = [
+            "Grandes jornadas começam com pequenos passos!",
+            "Consistência é a chave para o sucesso!",
+            "Você é mais forte do que imagina!",
+            "Cada dia é uma nova oportunidade!",
+            "Pequenos hábitos, grandes transformações!",
+            "O progresso acontece fora da zona de conforto!",
+            "Você está construindo algo incrível!",
+            "Continue! Você está indo muito bem!"
+        ];
+
+        const GUIDED_SUGGESTIONS = {
+            "CORPO": {
+                attribute: "SAÚDE FÍSICA",
+                habit: "Beber um copo de água ao acordar",
+                type: "binary",
+                target: 1,
+                icon: "fas fa-heartbeat"
+            },
+            "MENTE": {
+                attribute: "SAÚDE MENTAL",
+                habit: "Respirar profundamente por 1 minuto",
+                type: "binary",
+                target: 1,
+                icon: "fas fa-brain"
+            },
+            "ORGANIZACAO": {
+                attribute: "PRODUTIVIDADE",
+                habit: "Anotar 1 tarefa importante do dia",
+                type: "binary",
+                target: 1,
+                icon: "fas fa-calendar-check"
+            },
+            "RELACIONAMENTOS": {
+                attribute: "CONEXÕES",
+                habit: "Enviar uma mensagem positiva para alguém",
+                type: "binary",
+                target: 1,
+                icon: "fas fa-users"
+            }
+        };
+
+        // ============================================
+        // ESTADO DA APLICAÇÃO
+        // ============================================
+        let state = {
+            playerName: localStorage.getItem('playerName') || 'Jogador',
+            attributes: JSON.parse(localStorage.getItem('attributes')) || [],
+            habits: JSON.parse(localStorage.getItem('habits')) || [],
+            dailyEntries: JSON.parse(localStorage.getItem('dailyEntries')) || {},
+            streaks: JSON.parse(localStorage.getItem('streaks')) || { global: 0, attributes: {}, habits: {} },
+            points: JSON.parse(localStorage.getItem('points')) || { total: 0, daily: 0 },
+            level: parseInt(localStorage.getItem('level')) || 1,
+            currentDate: new Date().toISOString().split('T')[0]
+        };
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+            setupEventListeners();
+            updateUI();
+            createKanjiParticles();
+            createSakuraPetals();
+        });
+
+        function initApp() {
+            console.log('🚀 Inicializando Player Gamificado...');
+            
+            // Configura data máxima (hoje)
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('log-date').max = today;
+            
+            // Atualiza interface inicial
+            updatePlayerInfo();
+            updateDateDisplay();
+            updateHabitsList();
+            updateAttributesList();
+            updateStreaksDisplay();
+            
+            // Configura progresso do anel
+            updateProgressRing();
+        }
+
+        // ============================================
+        // FUNÇÕES DE UI
+        // ============================================
+        function updateUI() {
+            updatePlayerInfo();
+            updateDateDisplay();
+            updateHabitsList();
+            updateAttributesList();
+            updateStreaksDisplay();
+            updateProgressRing();
+            updateHistoryList();
+        }
+
+        function updatePlayerInfo() {
+            // Nome do jogador
+            document.getElementById('player-display-name').textContent = state.playerName;
+            document.getElementById('player-name').value = state.playerName;
+            
+            // Nível e XP
+            const levelData = calculateLevelData();
+            document.getElementById('current-level').textContent = state.level;
+            document.getElementById('current-xp').textContent = state.points.total;
+            document.getElementById('next-level-xp').textContent = levelData.xpForNextLevel;
+            
+            // Barra de progresso
+            const progressPercent = (levelData.xpInCurrentLevel / levelData.xpForNextLevel) * 100;
+            document.getElementById('level-progress-bar').style.width = `${progressPercent}%`;
+        }
+
+        function updateDateDisplay() {
+            const date = new Date(state.currentDate);
+            const today = new Date().toISOString().split('T')[0];
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            let displayText = formatDate(date);
+            let infoText = '';
+            
+            if (state.currentDate === today) {
+                displayText = 'Hoje';
+                infoText = formatDate(date);
+            } else if (state.currentDate === yesterdayStr) {
+                displayText = 'Ontem';
+                infoText = formatDate(date);
+            }
+            
+            document.getElementById('current-date-display').textContent = displayText;
+            document.getElementById('date-info').textContent = infoText;
+            
+            // Atualiza hábitos para a data selecionada
+            updateHabitsList();
+        }
+
+        function updateHabitsList() {
+            const container = document.getElementById('daily-habits-container');
+            const habits = state.habits;
+            
+            if (habits.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-plus-circle"></i>
+                        <h3>Nenhum hábito configurado</h3>
+                        <p>Vá para "Configuração" para criar seus primeiros hábitos</p>
+                        <button class="btn btn-primary" id="go-to-setup">Criar Hábitos</button>
+                    </div>
+                `;
+                document.getElementById('go-to-setup').addEventListener('click', () => switchScreen('setup'));
+                return;
+            }
+            
+            // Verifica se há registro para a data atual
+            const dailyEntry = state.dailyEntries[state.currentDate];
+            const habitsStatus = dailyEntry ? dailyEntry.habits : {};
+            
+            let completedCount = 0;
+            let totalPossiblePoints = 0;
+            
+            container.innerHTML = habits.map(habit => {
+                const habitStatus = habitsStatus[habit.id] || { value: 0, points: 0 };
+                const isCompleted = habit.type === 'binary' ? habitStatus.value >= 1 : habitStatus.value >= habit.target;
+                
+                if (isCompleted) completedCount++;
+                totalPossiblePoints += habit.type === 'binary' ? CONFIG.BINARY_HABIT_POINTS : habit.target * CONFIG.QUANTITATIVE_POINTS_PER_UNIT;
+                
+                return `
+                    <div class="habit-item" data-habit-id="${habit.id}">
+                        <div class="habit-checkbox ${isCompleted ? 'checked' : ''}" 
+                             onclick="toggleHabitCompletion('${habit.id}')">
+                        </div>
+                        <div class="habit-info">
+                            <div class="habit-name">${habit.name}</div>
+                            <div class="habit-meta">
+                                <span>${habit.attribute}</span>
+                                <span>•</span>
+                                <span>${habit.type === 'binary' ? 'Feito/Não' : `${habit.target} unid.`}</span>
+                            </div>
+                        </div>
+                        <div class="habit-points">${habitStatus.points || 0}p</div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Atualiza progresso do anel
+            const progressPercent = habits.length > 0 ? (completedCount / habits.length) * 100 : 0;
+            updateProgressRing(progressPercent);
+            
+            // Atualiza contador de pontos do dia
+            const dailyPoints = dailyEntry ? dailyEntry.totalPoints || 0 : 0;
+            document.getElementById('total-points').textContent = dailyPoints;
+        }
+
+        function updateAttributesList() {
+            const container = document.getElementById('attributes-list');
+            const attributes = state.attributes;
+            
+            if (attributes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" id="no-attributes-message">
+                        <i class="fas fa-layer-group"></i>
+                        <h3>Nenhum atributo criado</h3>
+                        <p>Crie seu primeiro atributo para começar</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Atualiza contador de obrigatórios
+            const mandatoryCount = attributes.filter(a => a.type === 'mandatory').length;
+            document.getElementById('mandatory-count').textContent = `${mandatoryCount}/${CONFIG.MIN_MANDATORY_ATTRIBUTES} obrigatórios`;
+            
+            // Atualiza lista
+            container.innerHTML = attributes.map(attribute => {
+                const streak = state.streaks.attributes[attribute.name] || 0;
+                return `
+                    <div class="list-item ${attribute.type === 'optional' ? 'optional' : ''}">
+                        <div class="list-item-info">
+                            <div class="list-item-title">
+                                ${attribute.name}
+                                ${attribute.type === 'mandatory' ? '<span style="color: var(--danger); font-size: 0.8em;"> (obrigatório)</span>' : ''}
+                            </div>
+                            <div class="list-item-subtitle">
+                                Streak: ${streak} dias ${streak >= 7 ? '🔥' : ''}
+                            </div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn-small btn-danger" onclick="removeAttribute('${attribute.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Atualiza dropdown de atributos para hábitos
+            updateAttributeDropdown();
+        }
+
+        function updateAttributeDropdown() {
+            const select = document.getElementById('new-habit-attribute');
+            select.innerHTML = '';
+            
+            if (state.attributes.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Crie atributos primeiro';
+                select.appendChild(option);
+                return;
+            }
+            
+            state.attributes.forEach(attribute => {
+                const option = document.createElement('option');
+                option.value = attribute.name;
+                option.textContent = `${attribute.name} (${attribute.type === 'mandatory' ? 'obrigatório' : 'opcional'})`;
+                select.appendChild(option);
+            });
+        }
+
+        function updateStreaksDisplay() {
+            document.getElementById('global-streak').textContent = state.streaks.global || 0;
+        }
+
+        function updateProgressRing(percent = 0) {
+            const circle = document.querySelector('.progress-ring-fill');
+            const text = document.getElementById('habits-progress');
+            
+            const radius = 24;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percent / 100) * circumference;
+            
+            if (circle) {
+                circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                circle.style.strokeDashoffset = offset;
+            }
+            if (text) {
+                text.textContent = `${Math.round(percent)}%`;
+            }
+        }
+
+        function updateHistoryList() {
+            const container = document.getElementById('history-list');
+            const entries = Object.entries(state.dailyEntries)
+                .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA))
+                .slice(0, 5);
+            
+            if (entries.length === 0) {
+                return;
+            }
+            
+            container.innerHTML = entries.map(([date, entry]) => {
+                return `
+                    <div class="list-item">
+                        <div class="list-item-info">
+                            <div class="list-item-title">${formatDate(new Date(date), true)}</div>
+                            <div class="list-item-subtitle">
+                                ${entry.totalPoints || 0} pontos • ${Object.keys(entry.habits || {}).length} hábitos
+                            </div>
+                        </div>
+                        <div class="list-item-actions">
+                            <span style="color: var(--success); font-weight: 600;">+${entry.totalPoints || 0}p</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // FUNÇÕES DE NEGÓCIO
+        // ============================================
+        function calculateLevelData() {
+            let level = 1;
+            let xpForNextLevel = CONFIG.BASE_LEVEL_XP;
+            let xpForCurrentLevel = 0;
+            let totalXpNeeded = CONFIG.BASE_LEVEL_XP;
+            
+            while (state.points.total >= totalXpNeeded) {
+                level++;
+                xpForCurrentLevel = totalXpNeeded;
+                xpForNextLevel = Math.floor(CONFIG.BASE_LEVEL_XP * Math.pow(CONFIG.LEVEL_MULTIPLIER, level - 1));
+                totalXpNeeded += xpForNextLevel;
+            }
+            
+            state.level = level;
+            
+            return {
+                xpForNextLevel,
+                xpInCurrentLevel: state.points.total - xpForCurrentLevel,
+                totalXpNeeded
+            };
+        }
+
+        function toggleHabitCompletion(habitId) {
+            const habit = state.habits.find(h => h.id === habitId);
+            if (!habit) return;
+            
+            const dailyEntry = state.dailyEntries[state.currentDate] || {
+                date: state.currentDate,
+                habits: {},
+                totalPoints: 0
+            };
+            
+            const habitStatus = dailyEntry.habits[habitId] || { value: 0, points: 0 };
+            
+            if (habit.type === 'binary') {
+                // Alterna entre feito/não feito
+                habitStatus.value = habitStatus.value >= 1 ? 0 : 1;
+                habitStatus.points = habitStatus.value >= 1 ? CONFIG.BINARY_HABIT_POINTS : 0;
+            } else {
+                // Para hábitos quantitativos, pede valor
+                const value = prompt(`Quantas unidades de "${habit.name}" você completou?`, habitStatus.value || 0);
+                if (value === null) return;
+                
+                const numValue = parseInt(value) || 0;
+                habitStatus.value = Math.min(numValue, habit.target);
+                habitStatus.points = Math.min(numValue, habit.target) * CONFIG.QUANTITATIVE_POINTS_PER_UNIT;
+            }
+            
+            // Aplica limites
+            habitStatus.points = Math.min(habitStatus.points, CONFIG.MAX_POINTS_PER_ATTRIBUTE);
+            
+            // Atualiza entrada diária
+            dailyEntry.habits[habitId] = habitStatus;
+            
+            // Recalcula pontos totais do dia
+            dailyEntry.totalPoints = Object.values(dailyEntry.habits)
+                .reduce((total, h) => total + h.points, 0);
+            dailyEntry.totalPoints = Math.min(dailyEntry.totalPoints, CONFIG.MAX_POINTS_PER_DAY);
+            
+            // Salva
+            state.dailyEntries[state.currentDate] = dailyEntry;
+            
+            // Atualiza streaks
+            updateStreaksForDate(state.currentDate);
+            
+            // Salva e atualiza UI
+            saveState();
+            updateUI();
+            
+            showFeedback(habitStatus.value > 0 ? 
+                `+${habitStatus.points} pontos para ${habit.name}` : 
+                `Hábito ${habit.name} removido`);
+        }
+
+        function saveDailyProgress() {
+            if (state.habits.length === 0) {
+                showFeedback('Crie hábitos primeiro', 'warning');
+                return;
+            }
+            
+            const dailyEntry = state.dailyEntries[state.currentDate];
+            if (!dailyEntry) {
+                showFeedback('Registre seus hábitos primeiro', 'warning');
+                return;
+            }
+            
+            // Atualiza pontos totais
+            const dailyPoints = dailyEntry.totalPoints || 0;
+            state.points.total += dailyPoints;
+            state.points.daily = dailyPoints;
+            
+            // Atualiza nível
+            calculateLevelData();
+            
+            // Salva
+            saveState();
+            updateUI();
+            
+            showFeedback(`Progresso salvo! +${dailyPoints} pontos`, 'success');
+        }
+
+        function addAttribute() {
+            const nameInput = document.getElementById('new-attribute-name');
+            const typeSelect = document.getElementById('new-attribute-type');
+            
+            const name = nameInput.value.trim().toUpperCase();
+            const type = typeSelect.value;
+            
+            // Validação
+            if (!name) {
+                showFeedback('Digite um nome para o atributo', 'warning');
+                return;
+            }
+            
+            if (state.attributes.some(a => a.name === name)) {
+                showFeedback('Atributo já existe', 'warning');
+                return;
+            }
+            
+            // Verifica limites
+            if (type === 'mandatory') {
+                const mandatoryCount = state.attributes.filter(a => a.type === 'mandatory').length;
+                if (mandatoryCount >= CONFIG.MAX_MANDATORY_ATTRIBUTES) {
+                    showFeedback(`Máximo de ${CONFIG.MAX_MANDATORY_ATTRIBUTES} atributos obrigatórios`, 'warning');
+                    return;
+                }
+            }
+            
+            // Cria atributo
+            const newAttribute = {
+                id: generateId(),
+                name,
+                type,
+                streak: 0,
+                createdAt: new Date().toISOString()
+            };
+            
+            state.attributes.push(newAttribute);
+            
+            // Limpa formulário
+            nameInput.value = '';
+            
+            // Salva e atualiza
+            saveState();
+            updateUI();
+            
+            showFeedback(`Atributo "${name}" criado!`, 'success');
+        }
+
+        function removeAttribute(attributeId) {
+            const attribute = state.attributes.find(a => a.id === attributeId);
+            if (!attribute) return;
+            
+            // Verifica hábitos associados
+            const associatedHabits = state.habits.filter(h => h.attribute === attribute.name);
+            if (associatedHabits.length > 0) {
+                if (!confirm(`Remover este atributo também removerá ${associatedHabits.length} hábito(s). Continuar?`)) {
+                    return;
+                }
+                
+                // Remove hábitos associados
+                state.habits = state.habits.filter(h => h.attribute !== attribute.name);
+            }
+            
+            // Remove atributo
+            state.attributes = state.attributes.filter(a => a.id !== attributeId);
+            
+            // Salva e atualiza
+            saveState();
+            updateUI();
+            
+            showFeedback(`Atributo "${attribute.name}" removido`, 'success');
+        }
+
+        function addHabit() {
+            const nameInput = document.getElementById('new-habit-name');
+            const attributeSelect = document.getElementById('new-habit-attribute');
+            const typeSelect = document.getElementById('new-habit-type');
+            const targetInput = document.getElementById('new-habit-target');
+            
+            const name = nameInput.value.trim();
+            const attribute = attributeSelect.value;
+            const type = typeSelect.value;
+            const target = parseInt(targetInput.value) || 1;
+            
+            // Validação
+            if (!name) {
+                showFeedback('Digite um nome para o hábito', 'warning');
+                return;
+            }
+            
+            if (!attribute) {
+                showFeedback('Selecione um atributo', 'warning');
+                return;
+            }
+            
+            if (target < 1) {
+                showFeedback('A meta deve ser pelo menos 1', 'warning');
+                return;
+            }
+            
+            // Cria hábito
+            const newHabit = {
+                id: generateId(),
+                name,
+                attribute,
+                type,
+                target,
+                basePoints: type === 'binary' ? CONFIG.BINARY_HABIT_POINTS : CONFIG.QUANTITATIVE_POINTS_PER_UNIT,
+                streak: 0,
+                createdAt: new Date().toISOString()
+            };
+            
+            state.habits.push(newHabit);
+            
+            // Limpa formulário
+            nameInput.value = '';
+            targetInput.value = '1';
+            
+            // Salva e atualiza
+            saveState();
+            updateUI();
+            
+            showFeedback(`Hábito "${name}" criado!`, 'success');
+        }
+
+        function removeHabit(habitId) {
+            const habit = state.habits.find(h => h.id === habitId);
+            if (!habit) return;
+            
+            state.habits = state.habits.filter(h => h.id !== habitId);
+            
+            // Remove de registros diários
+            Object.keys(state.dailyEntries).forEach(date => {
+                if (state.dailyEntries[date].habits[habitId]) {
+                    delete state.dailyEntries[date].habits[habitId];
+                }
+            });
+            
+            // Salva e atualiza
+            saveState();
+            updateUI();
+            
+            showFeedback(`Hábito "${habit.name}" removido`, 'success');
+        }
+
+        function updateStreaksForDate(date) {
+            const dailyEntry = state.dailyEntries[date];
+            if (!dailyEntry) return;
+            
+            const dateObj = new Date(date);
+            const yesterday = new Date(dateObj);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            // Atualiza streaks por atributo
+            state.attributes.forEach(attribute => {
+                const attributeHabits = state.habits.filter(h => h.attribute === attribute.name);
+                const anyHabitCompleted = attributeHabits.some(habit => {
+                    const habitStatus = dailyEntry.habits[habit.id];
+                    return habitStatus && habitStatus.value > 0;
+                });
+                
+                if (anyHabitCompleted) {
+                    const yesterdayStreak = state.streaks.attributes[attribute.name] || 0;
+                    state.streaks.attributes[attribute.name] = yesterdayStreak + 1;
+                } else {
+                    state.streaks.attributes[attribute.name] = 0;
+                }
+            });
+            
+            // Atualiza streak global
+            const mandatoryAttributes = state.attributes.filter(a => a.type === 'mandatory');
+            const allMandatoryCompleted = mandatoryAttributes.every(attribute => {
+                return state.streaks.attributes[attribute.name] > 0;
+            });
+            
+            if (allMandatoryCompleted) {
+                state.streaks.global = (state.streaks.global || 0) + 1;
+            } else {
+                state.streaks.global = 0;
+            }
+            
+            // Atualiza streaks por hábito
+            Object.keys(dailyEntry.habits).forEach(habitId => {
+                const habitStatus = dailyEntry.habits[habitId];
+                if (habitStatus.value > 0) {
+                    state.streaks.habits[habitId] = (state.streaks.habits[habitId] || 0) + 1;
+                } else {
+                    state.streaks.habits[habitId] = 0;
+                }
+            });
+        }
+
+        function generateLog() {
+            const logDate = document.getElementById('log-date').value || state.currentDate;
+            const dailyEntry = state.dailyEntries[logDate];
+            
+            if (!dailyEntry) {
+                showFeedback('Nenhum registro para esta data', 'warning');
+                return;
+            }
+            
+            // Prepara dados do log
+            const mandatoryAttributes = state.attributes
+                .filter(a => a.type === 'mandatory')
+                .map(a => a.name);
+            
+            const optionalAttributes = state.attributes
+                .filter(a => a.type === 'optional')
+                .map(a => a.name);
+            
+            const habitsLog = Object.entries(dailyEntry.habits).map(([habitId, habitStatus]) => {
+                const habit = state.habits.find(h => h.id === habitId);
+                return {
+                    name: habit ? habit.name : 'Hábito desconhecido',
+                    attribute: habit ? habit.attribute : 'Desconhecido',
+                    type: habit ? habit.type : 'binary',
+                    value: habitStatus.value,
+                    points: habitStatus.points
+                };
+            });
+            
+            const attributePoints = {};
+            habitsLog.forEach(habit => {
+                if (!attributePoints[habit.attribute]) {
+                    attributePoints[habit.attribute] = 0;
+                }
+                attributePoints[habit.attribute] += habit.points;
+            });
+            
+            const streaksLog = { global: state.streaks.global || 0 };
+            state.attributes.forEach(attr => {
+                streaksLog[attr.name] = state.streaks.attributes[attr.name] || 0;
+            });
+            
+            // Cria objeto JSON
+            const logData = {
+                player: state.playerName,
+                date: logDate,
+                attributesConfig: {
+                    mandatory: mandatoryAttributes,
+                    optional: optionalAttributes
+                },
+                habits: habitsLog,
+                attributePoints: attributePoints,
+                streaks: streaksLog,
+                totalPoints: dailyEntry.totalPoints || 0,
+                level: state.level
+            };
+            
+            // Exibe log
+            const logOutput = document.getElementById('log-output');
+            const logContainer = document.getElementById('log-output-container');
+            
+            logOutput.textContent = JSON.stringify(logData, null, 2);
+            logContainer.style.display = 'block';
+            
+            showFeedback('Log gerado com sucesso!', 'success');
+        }
+
+        function copyLog() {
+            const logOutput = document.getElementById('log-output');
+            
+            if (!logOutput.textContent) {
+                showFeedback('Gere o log primeiro', 'warning');
+                return;
+            }
+            
+            navigator.clipboard.writeText(logOutput.textContent)
+                .then(() => showFeedback('Log copiado!', 'success'))
+                .catch(() => {
+                    // Fallback para navegadores antigos
+                    const textArea = document.createElement('textarea');
+                    textArea.value = logOutput.textContent;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showFeedback('Log copiado!', 'success');
+                });
+        }
+
+        function shareLog() {
+            const logOutput = document.getElementById('log-output');
+            
+            if (!logOutput.textContent) {
+                showFeedback('Gere o log primeiro', 'warning');
+                return;
+            }
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Log Diário - Player Gamificado',
+                    text: 'Meu progresso diário:',
+                    files: [new Blob([logOutput.textContent], { type: 'application/json' })]
+                }).catch(console.error);
+            } else {
+                showFeedback('Compartilhamento não suportado neste navegador', 'warning');
+            }
+        }
+
+        // ============================================
+        // FUNÇÕES UTILITÁRIAS
+        // ============================================
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function formatDate(date, full = false) {
+            const d = new Date(date);
+            const options = full ? {
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            } : {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            };
+            
+            return d.toLocaleDateString('pt-BR', options);
+        }
+
+        function showFeedback(message, type = 'success') {
+            const feedback = document.getElementById('feedback-toast');
+            const icon = feedback.querySelector('.feedback-icon i');
+            const messageEl = document.getElementById('feedback-message');
+            
+            // Configura tipo
+            feedback.className = 'feedback';
+            feedback.classList.add(type);
+            
+            // Configura ícone
+            icon.className = {
+                'success': 'fas fa-check',
+                'warning': 'fas fa-exclamation-triangle',
+                'danger': 'fas fa-times-circle'
+            }[type] || 'fas fa-info-circle';
+            
+            // Configura mensagem
+            messageEl.textContent = message;
+            
+            // Mostra feedback
+            feedback.classList.remove('d-none');
+            
+            // Esconde após 3 segundos
+            setTimeout(() => {
+                feedback.classList.add('d-none');
+            }, 3000);
+        }
+
+        function switchScreen(screenName) {
+            // Esconde todas as telas
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Mostra tela selecionada
+            const targetScreen = document.getElementById(`${screenName}-screen`);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+            
+            // Atualiza tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.screen === screenName) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Atualiza indicador
+            document.querySelectorAll('.tab-indicator span').forEach((span, index) => {
+                span.classList.remove('active');
+                const tabNames = ['home', 'setup', 'log'];
+                if (index === tabNames.indexOf(screenName)) {
+                    span.classList.add('active');
+                }
+            });
+            
+            // Atualiza UI específica da tela
+            if (screenName === 'log') {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('log-date').value = today;
+            }
+            
+            // Garante que o UI seja atualizado
+            updateUI();
+        }
+
+        function saveState() {
+            localStorage.setItem('playerName', state.playerName);
+            localStorage.setItem('attributes', JSON.stringify(state.attributes));
+            localStorage.setItem('habits', JSON.stringify(state.habits));
+            localStorage.setItem('dailyEntries', JSON.stringify(state.dailyEntries));
+            localStorage.setItem('streaks', JSON.stringify(state.streaks));
+            localStorage.setItem('points', JSON.stringify(state.points));
+            localStorage.setItem('level', state.level.toString());
+        }
+
+        function setupEventListeners() {
+            // Navegação
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    switchScreen(tab.dataset.screen);
+                });
+            });
+            
+            // Data
+            document.getElementById('prev-date').addEventListener('click', () => {
+                const date = new Date(state.currentDate);
+                date.setDate(date.getDate() - 1);
+                state.currentDate = date.toISOString().split('T')[0];
+                updateUI();
+            });
+            
+            document.getElementById('next-date').addEventListener('click', () => {
+                const date = new Date(state.currentDate);
+                const today = new Date().toISOString().split('T')[0];
+                date.setDate(date.getDate() + 1);
+                
+                // Não permite datas futuras
+                if (date.toISOString().split('T')[0] <= today) {
+                    state.currentDate = date.toISOString().split('T')[0];
+                    updateUI();
+                }
+            });
+            
+            // Salvar nome
+            document.getElementById('save-player-name').addEventListener('click', () => {
+                const name = document.getElementById('player-name').value.trim();
+                if (name) {
+                    state.playerName = name;
+                    saveState();
+                    updateUI();
+                    showFeedback('Nome salvo!', 'success');
+                }
+            });
+            
+            // Salvar progresso diário
+            document.getElementById('save-daily').addEventListener('click', saveDailyProgress);
+            
+            // Adicionar atributo
+            document.getElementById('add-attribute').addEventListener('click', addAttribute);
+            
+            // Adicionar hábito
+            document.getElementById('add-habit').addEventListener('click', addHabit);
+            
+            // Log
+            document.getElementById('generate-log').addEventListener('click', generateLog);
+            document.getElementById('copy-log').addEventListener('click', copyLog);
+            document.getElementById('share-log').addEventListener('click', shareLog);
+            
+            // Modo guiado
+            document.getElementById('start-guided-mode').addEventListener('click', () => {
+                document.getElementById('guided-modal').style.display = 'flex';
+            });
+            
+            document.getElementById('close-guided-modal').addEventListener('click', () => {
+                document.getElementById('guided-modal').style.display = 'none';
+            });
+            
+            document.querySelectorAll('.guided-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const area = this.dataset.area;
+                    const suggestion = GUIDED_SUGGESTIONS[area];
+                    
+                    // Cria atributo se necessário
+                    const mandatoryCount = state.attributes.filter(a => a.type === 'mandatory').length;
+                    if (mandatoryCount < CONFIG.MIN_MANDATORY_ATTRIBUTES) {
+                        state.attributes.push({
+                            id: generateId(),
+                            name: suggestion.attribute,
+                            type: 'mandatory',
+                            streak: 0,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                    
+                    // Cria hábito
+                    state.habits.push({
+                        id: generateId(),
+                        name: suggestion.habit,
+                        attribute: suggestion.attribute,
+                        type: suggestion.type,
+                        target: suggestion.target,
+                        basePoints: CONFIG.BINARY_HABIT_POINTS,
+                        streak: 0,
+                        createdAt: new Date().toISOString(),
+                        guided: true
+                    });
+                    
+                    // Mostra resultado
+                    const resultDiv = document.getElementById('guided-result');
+                    const suggestionDiv = document.getElementById('guided-suggestion');
+                    const phraseDiv = document.getElementById('motivational-phrase');
+                    
+                    suggestionDiv.innerHTML = `
+                        <div style="text-align: center;">
+                            <i class="${suggestion.icon}" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h4 style="margin-bottom: 5px;">${suggestion.attribute}</h4>
+                            <p style="color: var(--gray); margin-bottom: 10px;">${suggestion.habit}</p>
+                            <p style="font-size: 0.9rem; color: var(--warning);">
+                                <i class="fas fa-lock"></i> Bloqueado por ${CONFIG.GUIDED_LOCK_DAYS} dias
+                            </p>
+                        </div>
+                    `;
+                    
+                    // Frase motivacional aleatória
+                    phraseDiv.textContent = MOTIVATIONAL_PHRASES[Math.floor(Math.random() * MOTIVATIONAL_PHRASES.length)];
+                    
+                    resultDiv.style.display = 'block';
+                    
+                    // Salva e atualiza
+                    saveState();
+                    updateUI();
+                    
+                    showFeedback('Modo guiado ativado!', 'success');
+                    
+                    // Fecha modal após 3 segundos
+                    setTimeout(() => {
+                        document.getElementById('guided-modal').style.display = 'none';
+                        resultDiv.style.display = 'none';
+                        switchScreen('home');
+                    }, 3000);
+                });
+            });
+            
+            // Fechar modal ao clicar fora
+            document.getElementById('guided-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('guided-modal')) {
+                    document.getElementById('guided-modal').style.display = 'none';
+                }
+            });
+            
+            // Enter para adicionar
+            document.getElementById('new-attribute-name').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addAttribute();
+            });
+            
+            document.getElementById('new-habit-name').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addHabit();
+            });
+        }
+
+        // ============================================
+        // EFEITOS VISUAIS DINÂMICOS
+        // ============================================
+        function createKanjiParticles() {
+            const kanjis = ['武', '道', '侍', '心', '魂', '力', '技', '速', '静', '動', '勇', '忍', '禅', '悟', '修', '練'];
+            const container = document.getElementById('kanji-container');
+            
+            if (!container) return;
+            
+            for (let i = 0; i < 15; i++) {
+                const kanji = document.createElement('div');
+                kanji.className = 'kanji-character';
+                kanji.textContent = kanjis[Math.floor(Math.random() * kanjis.length)];
+                kanji.style.left = `${Math.random() * 100}%`;
+                kanji.style.top = `${Math.random() * 100}%`;
+                kanji.style.animationDelay = `${Math.random() * 5}s`;
+                kanji.style.fontSize = `${Math.random() * 20 + 16}px`;
+                container.appendChild(kanji);
+            }
+        }
+
+        function createSakuraPetals() {
+            const container = document.querySelector('.sakura-container') || document.body;
+            
+            for (let i = 0; i < 20; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'sakura-petal';
+                petal.style.left = `${Math.random() * 100}%`;
+                petal.style.animationDelay = `${Math.random() * 10}s`;
+                petal.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                container.appendChild(petal);
+            }
+        }
+    </script>
+</body>
+</html>

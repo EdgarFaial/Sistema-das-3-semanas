@@ -1,0 +1,1739 @@
+/* ============================================
+   TEMA: ALISTAMENTO INTERNO - DOUTRINA NAVAL
+   Conceito: Sistema de controle interno estilo doutrina militar naval
+   Palavras-chave: Inerte, Convocado, Em Adaptação, Em Regime, Condicionado, Operacional, Apto
+   ============================================ */
+
+/* ============================================
+   FUNDAMENTOS DO SISTEMA
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #0a0c14;
+  color: #c0c6d4;
+  font-family: 'IBM Plex Mono', 'Courier New', 'Consolas', monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  min-height: 100vh;
+  overflow-x: hidden;
+  letter-spacing: 0.5px;
+}
+
+/* PADRÃO DE GRADE NAVAL */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(32, 40, 56, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(32, 40, 56, 0.15) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: -3;
+  opacity: 0.3;
+}
+
+/* SOMBRAS E PROFUNDIDADE NAVAL */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(0, 80, 120, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(20, 40, 60, 0.05) 0%, transparent 50%);
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* ============================================
+   VARIÁVEIS DO SISTEMA NAVAL
+   ============================================ */
+:root {
+  /* CORES DO SISTEMA NAVAL */
+  --navy-deep: #0a0c14;
+  --navy-dark: #121825;
+  --navy-medium: #1a2332;
+  --navy-light: #232e40;
+  --navy-surface: #2a384e;
+  
+  /* ESTADOS DE ALISTAMENTO */
+  --inerte: #4a5568;          /* Cinza - inativo */
+  --convocado: #4299e1;       /* Azul claro - chamado */
+  --adaptacao: #48bb78;       /* Verde - adaptando */
+  --regime: #ed8936;          /* Laranja - em treino */
+  --condicionado: #9f7aea;    /* Roxo - condicionado */
+  --operacional: #38b2ac;     /* Turquesa - operacional */
+  --apto: #68d391;            /* Verde brilhante - pronto */
+  
+  /* CORES DO SISTEMA */
+  --text-primary: #c0c6d4;
+  --text-secondary: #8a94a6;
+  --text-dim: #64748b;
+  --text-highlight: #e2e8f0;
+  
+  /* BORDAS E DIVISÓRIAS */
+  --border-heavy: #2d3748;
+  --border-medium: #4a5568;
+  --border-light: #718096;
+  
+  /* SOMBRAS NAVAL */
+  --shadow-deep: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-medium: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  
+  /* TIPOGRAFIA NAVAL */
+  --font-mono: 'IBM Plex Mono', 'Consolas', monospace;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+}
+
+/* ============================================
+   CONTAINER PRINCIPAL - CONSOLE DE CONTROLE
+   ============================================ */
+.app-container {
+  max-width: 100%;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 0 0 90px;
+  position: relative;
+  background: var(--navy-deep);
+  overflow: hidden;
+}
+
+/* BARRA SUPERIOR DE STATUS */
+.system-status-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, 
+    var(--inerte) 0%,
+    var(--convocado) 20%,
+    var(--adaptacao) 40%,
+    var(--regime) 60%,
+    var(--condicionado) 80%,
+    var(--apto) 100%);
+  z-index: 1000;
+  opacity: 0.8;
+}
+
+/* ============================================
+   CABEÇALHO - COMANDO CENTRAL
+   ============================================ */
+.app-header {
+  background: var(--navy-dark);
+  padding: 20px 24px 22px;
+  border-bottom: 2px solid var(--border-heavy);
+  position: relative;
+  margin-bottom: 2px;
+  box-shadow: var(--shadow-deep);
+}
+
+.app-header::before {
+  content: "SISTEMA DE ALISTAMENTO INTERNO";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: var(--text-dim);
+  background: var(--navy-dark);
+  padding: 0 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.app-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-highlight);
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-sans);
+}
+
+.app-header h1 i {
+  color: var(--convocado);
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.app-header p {
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+/* INDICADOR DE ABA - ESTAÇÕES DO SISTEMA */
+.tab-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-heavy);
+  position: relative;
+}
+
+.tab-indicator::before {
+  content: "···";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+.tab-indicator span {
+  width: 10px;
+  height: 10px;
+  border-radius: 1px;
+  background: var(--navy-medium);
+  border: 1px solid var(--border-medium);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.tab-indicator span.active {
+  background: var(--operacional);
+  border-color: var(--operacional);
+  box-shadow: 
+    0 0 0 1px rgba(56, 178, 172, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transform: scale(1.2);
+}
+
+.tab-indicator span.active::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border: 1px solid var(--operacional);
+  border-radius: 2px;
+  opacity: 0.4;
+  animation: stationPulse 2s infinite;
+}
+
+@keyframes stationPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.1); }
+}
+
+/* ============================================
+   TELAS - CONSOLES DE OPERAÇÃO
+   ============================================ */
+.screen {
+  display: none;
+  animation: consoleFadeIn 0.4s ease-out;
+}
+
+.screen.active {
+  display: block;
+}
+
+@keyframes consoleFadeIn {
+  from { 
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   STATUS DO RECRUTA - RELATÓRIO DE STATUS
+   ============================================ */
+.player-status {
+  background: var(--navy-dark);
+  margin: 2px;
+  padding: 24px;
+  position: relative;
+  border: 1px solid var(--border-heavy);
+  overflow: hidden;
+}
+
+.player-status::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    var(--inerte),
+    var(--convocado),
+    var(--adaptacao),
+    var(--regime),
+    var(--condicionado),
+    var(--operacional),
+    var(--apto)
+  );
+  opacity: 0.6;
+}
+
+.player-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.player-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-highlight);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  padding-left: 16px;
+  font-family: var(--font-sans);
+}
+
+.player-name::before {
+  content: "▶";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--convocado);
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.player-level {
+  background: var(--navy-medium);
+  color: var(--regime);
+  padding: 8px 16px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border-medium);
+  font-family: var(--font-mono);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* BARRA DE XP - PROGRESSO DE CONDICIONAMENTO */
+.xp-progress {
+  position: relative;
+}
+
+.xp-bar {
+  height: 8px;
+  background: var(--navy-medium);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-heavy);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.xp-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    var(--inerte), 
+    var(--convocado), 
+    var(--adaptacao), 
+    var(--regime), 
+    var(--condicionado));
+  border-radius: 2px;
+  width: 0%;
+  transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.xp-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.1), 
+    transparent);
+  animation: conditioningFlow 2s infinite linear;
+}
+
+@keyframes conditioningFlow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.xp-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* ============================================
+   SELEÇÃO DE DATA - REGISTRO TEMPORAL
+   ============================================ */
+.date-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--navy-dark);
+  padding: 16px 20px;
+  margin: 2px;
+  border: 1px solid var(--border-heavy);
+  position: relative;
+}
+
+.date-selector::before {
+  content: "REGISTRO TEMPORAL";
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  font-size: 9px;
+  color: var(--text-dim);
+  background: var(--navy-dark);
+  padding: 0 8px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.date-nav-btn {
+  background: var(--navy-medium);
+  border: 1px solid var(--border-medium);
+  width: 34px;
+  height: 34px;
+  border-radius: 2px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  box-shadow: var(--shadow-subtle);
+}
+
+.date-nav-btn:hover {
+  background: var(--navy-light);
+  border-color: var(--border-light);
+  transform: translateY(-1px);
+}
+
+.date-nav-btn:active {
+  transform: translateY(0);
+  background: var(--navy-medium);
+}
+
+.date-display {
+  text-align: center;
+  flex-grow: 1;
+  padding: 0 16px;
+}
+
+.current-date {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-highlight);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--font-sans);
+}
+
+.date-info {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+/* ============================================
+   STREAKS - MÉTRICAS DE DESEMPENHO
+   ============================================ */
+.card {
+  background: var(--navy-dark);
+  margin: 2px;
+  padding: 0;
+  position: relative;
+  border: 1px solid var(--border-heavy);
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--border-light), 
+    transparent);
+}
+
+.card-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-heavy);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(42, 56, 78, 0.3);
+}
+
+.card-header h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-highlight);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+}
+
+.card-header h2 i {
+  color: var(--regime);
+  font-size: 12px;
+}
+
+.streaks-container {
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.streak-card {
+  background: var(--navy-medium);
+  border: 1px solid var(--border-medium);
+  border-radius: 2px;
+  padding: 20px 16px;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.streak-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    var(--inerte), 
+    var(--apto));
+  opacity: 0.8;
+}
+
+.streak-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+.streak-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--apto);
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.streak-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* ============================================
+   HÁBITOS - ROTINAS DE CONDICIONAMENTO
+   ============================================ */
+#daily-habits-container {
+  padding: 18px 22px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.habit-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: var(--navy-medium);
+  border: 1px solid var(--border-medium);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.habit-item:hover {
+  border-color: var(--border-light);
+  background: var(--navy-light);
+  transform: translateX(4px);
+}
+
+.habit-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--navy-surface);
+  transition: all 0.3s ease;
+}
+
+.habit-item:hover::before {
+  background: var(--operacional);
+}
+
+.habit-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  border: 1px solid var(--border-medium);
+  margin-right: 14px;
+  position: relative;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  background: var(--navy-dark);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.habit-checkbox.checked {
+  background: var(--apto);
+  border-color: var(--apto);
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 10px rgba(104, 211, 145, 0.3);
+}
+
+.habit-checkbox.checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--navy-dark);
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.habit-info {
+  flex-grow: 1;
+}
+
+.habit-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-sans);
+}
+
+.habit-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+}
+
+.habit-meta span {
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1px;
+  border: 1px solid var(--border-heavy);
+}
+
+.habit-points {
+  background: var(--navy-surface);
+  color: var(--condicionado);
+  padding: 8px 14px;
+  border-radius: 2px;
+  font-weight: 600;
+  font-size: 12px;
+  border: 1px solid var(--border-medium);
+  min-width: 55px;
+  text-align: center;
+  font-family: var(--font-mono);
+  letter-spacing: 0.8px;
+}
+
+/* ESTADO VAZIO - SEM ROTINAS DEFINIDAS */
+.empty-state {
+  text-align: center;
+  padding: 40px 22px;
+  background: var(--navy-medium);
+  border: 2px dashed var(--border-medium);
+  border-radius: 2px;
+  margin: 20px 0;
+}
+
+.empty-state i {
+  font-size: 32px;
+  color: var(--text-dim);
+  margin-bottom: 18px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--font-sans);
+}
+
+.empty-state p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 280px;
+  margin: 0 auto 22px;
+  line-height: 1.5;
+}
+
+/* ============================================
+   BOTÕES - COMANDOS DO SISTEMA
+   ============================================ */
+.btn {
+  padding: 14px 20px;
+  border-radius: 2px;
+  border: none;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  font-family: var(--font-sans);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.1), 
+    transparent);
+  transition: left 0.6s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn-primary {
+  background: var(--operacional);
+  color: var(--navy-deep);
+  border: 1px solid var(--operacional);
+  box-shadow: 
+    0 2px 8px rgba(56, 178, 172, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary:hover {
+  background: #319795;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 12px rgba(56, 178, 172, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-success {
+  background: var(--apto);
+  color: var(--navy-deep);
+  border: 1px solid var(--apto);
+  box-shadow: 
+    0 2px 8px rgba(104, 211, 145, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-success:hover {
+  background: #48bb78;
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn i {
+  font-size: 13px;
+}
+
+/* ============================================
+   FORMULÁRIOS - ENTRADAS DE DADOS
+   ============================================ */
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--font-sans);
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--navy-medium);
+  border: 1px solid var(--border-medium);
+  border-radius: 2px;
+  color: var(--text-primary);
+  font-size: 12px;
+  transition: all 0.3s ease;
+  font-family: var(--font-sans);
+  letter-spacing: 0.3px;
+}
+
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--operacional);
+  background: var(--navy-light);
+  box-shadow: 
+    0 0 0 2px rgba(56, 178, 172, 0.1),
+    inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.form-input::placeholder {
+  color: var(--text-dim);
+}
+
+/* ============================================
+   LISTAS - REGISTROS DO SISTEMA
+   ============================================ */
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: var(--navy-medium);
+  border: 1px solid var(--border-medium);
+  border-radius: 2px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.list-item:hover {
+  border-color: var(--border-light);
+  background: var(--navy-light);
+  transform: translateX(4px);
+}
+
+.list-item.optional {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+.list-item.optional:hover {
+  opacity: 1;
+}
+
+.list-item-info {
+  flex-grow: 1;
+}
+
+.list-item-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-sans);
+}
+
+.list-item-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+}
+
+.list-item-actions {
+  flex-shrink: 0;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 10px;
+  border-radius: 1px;
+  letter-spacing: 0.5px;
+}
+
+.btn-danger {
+  background: rgba(237, 100, 54, 0.1);
+  color: var(--regime);
+  border: 1px solid rgba(237, 100, 54, 0.3);
+}
+
+.btn-danger:hover {
+  background: rgba(237, 100, 54, 0.2);
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   ANEL DE PROGRESSO - MEDIDOR CIRCULAR
+   ============================================ */
+.progress-ring {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+}
+
+.progress-ring-circle {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+  fill: none;
+  stroke: var(--navy-surface);
+  stroke-width: 4;
+}
+
+.progress-ring-fill {
+  fill: none;
+  stroke: var(--adaptacao);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease-out;
+}
+
+.progress-ring-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+/* ============================================
+   NAVEGAÇÃO INFERIOR - CONSOLE DE CONTROLE
+   ============================================ */
+.nav-tabs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--navy-dark);
+  border-top: 2px solid var(--border-heavy);
+  display: flex;
+  padding: 12px 0;
+  z-index: 1000;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.nav-tabs::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--operacional), 
+    transparent);
+  opacity: 0.5;
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  position: relative;
+  border-right: 1px solid var(--border-heavy);
+}
+
+.nav-tab:last-child {
+  border-right: none;
+}
+
+.nav-tab::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  background: var(--operacional);
+  transition: width 0.3s ease;
+}
+
+.nav-tab.active {
+  color: var(--text-highlight);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.nav-tab.active::before {
+  width: 40px;
+}
+
+.nav-tab i {
+  font-size: 16px;
+  margin-bottom: 6px;
+  transition: all 0.3s ease;
+}
+
+.nav-tab.active i {
+  color: var(--operacional);
+  transform: translateY(-2px);
+}
+
+.tab-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.nav-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ============================================
+   MODAL - TERMINAL DE COMANDO
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 12, 20, 0.92);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  animation: commandFadeIn 0.4s ease-out;
+}
+
+@keyframes commandFadeIn {
+  from { 
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to { 
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+.modal {
+  background: var(--navy-dark);
+  border-radius: 2px;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid var(--border-heavy);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  animation: commandOpen 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes commandOpen {
+  from { 
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-heavy);
+  background: linear-gradient(
+    to bottom,
+    rgba(56, 178, 172, 0.1),
+    transparent
+  );
+}
+
+.modal-title {
+  font-size: 14px;
+  color: var(--text-highlight);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+}
+
+.modal-title i {
+  color: var(--condicionado);
+}
+
+.modal-close {
+  background: var(--navy-medium);
+  border: 1px solid var(--border-medium);
+  color: var(--text-primary);
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  background: var(--regime);
+  color: var(--navy-dark);
+  border-color: var(--regime);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.guided-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.guided-option {
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--border-medium);
+  background: var(--navy-medium);
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.guided-option:hover {
+  border-color: var(--operacional);
+  background: var(--navy-light);
+  transform: translateY(-3px);
+}
+
+.guided-option i {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.guided-option:hover i {
+  color: var(--operacional);
+  transform: scale(1.1);
+}
+
+.motivational-phrase {
+  font-style: italic;
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 12px;
+  border-radius: 2px;
+  background: var(--navy-medium);
+  border-left: 3px solid var(--adaptacao);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ============================================
+   FEEDBACK - SINAIS DO SISTEMA
+   ============================================ */
+.feedback {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  background: var(--navy-dark);
+  border-radius: 2px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid var(--border-medium);
+  border-left: 3px solid var(--operacional);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(0, 0, 0, 0.3);
+  z-index: 3000;
+  max-width: 350px;
+  animation: signalTransmit 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+             signalPulse 2s infinite alternate;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes signalTransmit {
+  from { 
+    transform: translateX(100%) translateY(-15px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes signalPulse {
+  from { 
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.3);
+  }
+  to { 
+    box-shadow: 
+      0 6px 20px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.feedback.success {
+  border-left-color: var(--apto);
+}
+
+.feedback.warning {
+  border-left-color: var(--regime);
+}
+
+.feedback.danger {
+  border-left-color: #e53e3e;
+}
+
+.feedback-icon i {
+  font-size: 18px;
+}
+
+.feedback.success .feedback-icon i {
+  color: var(--apto);
+}
+
+.feedback.warning .feedback-icon i {
+  color: var(--regime);
+}
+
+.feedback.danger .feedback-icon i {
+  color: #e53e3e;
+}
+
+.feedback-content {
+  flex-grow: 1;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.d-none {
+  display: none !important;
+}
+
+/* ============================================
+   LOG OUTPUT - RELATÓRIO DO SISTEMA
+   ============================================ */
+.log-output {
+  background: var(--navy-medium);
+  border-radius: 2px;
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow-x: auto;
+  border: 1px solid var(--border-medium);
+  margin-bottom: 16px;
+  max-height: 250px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.log-output::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.log-output::-webkit-scrollbar-track {
+  background: var(--navy-dark);
+  border-radius: 2px;
+}
+
+.log-output::-webkit-scrollbar-thumb {
+  background: var(--navy-surface);
+  border-radius: 2px;
+  border: 1px solid var(--border-heavy);
+}
+
+.log-output::-webkit-scrollbar-thumb:hover {
+  background: var(--border-medium);
+}
+
+/* ============================================
+   ELEMENTOS DOUTRINAIS NAVAL
+   ============================================ */
+
+/* INSÍGNIA DO SISTEMA */
+.system-insignia {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border-medium);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+/* LINHAS DE GRADE ESTRATÉGICA */
+.strategic-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  background: linear-gradient(
+      90deg,
+      transparent 99%,
+      rgba(66, 153, 225, 0.03) 100%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 99%,
+      rgba(66, 153, 225, 0.03) 100%
+    );
+  background-size: 40px 40px;
+  opacity: 0.2;
+}
+
+/* INDICADORES DE STATUS NAVAL */
+.naval-status-indicators {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 100;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--navy-surface);
+  animation: statusCycle 4s infinite;
+}
+
+.status-indicator:nth-child(1) { animation-delay: 0s; }
+.status-indicator:nth-child(2) { animation-delay: 0.5s; }
+.status-indicator:nth-child(3) { animation-delay: 1s; }
+
+@keyframes statusCycle {
+  0%, 100% { background: var(--navy-surface); }
+  33% { background: var(--operacional); }
+  66% { background: var(--condicionado); }
+}
+
+/* ============================================
+   ANIMAÇÕES DOUTRINAIS
+   ============================================ */
+
+/* CICLO DE ALISTAMENTO */
+@keyframes enlistmentCycle {
+  0% { color: var(--inerte); }
+  14% { color: var(--convocado); }
+  28% { color: var(--adaptacao); }
+  42% { color: var(--regime); }
+  57% { color: var(--condicionado); }
+  71% { color: var(--operacional); }
+  85% { color: var(--apto); }
+  100% { color: var(--inerte); }
+}
+
+/* PULSO OPERACIONAL */
+@keyframes operationalPulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* TREINAMENTO EM REGIME */
+@keyframes regimeTraining {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* CONDICIONAMENTO PROGRESSIVO */
+@keyframes conditioningProgressive {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ============================================
+   ESTADOS DINÂMICOS DO SISTEMA
+   ============================================ */
+.state-inerte {
+  color: var(--inerte);
+  opacity: 0.7;
+}
+
+.state-convocado {
+  color: var(--convocado);
+  animation: enlistmentCycle 7s infinite;
+}
+
+.state-adaptacao {
+  color: var(--adaptacao);
+  animation: operationalPulse 2s infinite;
+}
+
+.state-regime {
+  color: var(--regime);
+  animation: regimeTraining 1s infinite;
+}
+
+.state-condicionado {
+  color: var(--condicionado);
+}
+
+.state-operacional {
+  color: var(--operacional);
+  animation: operationalPulse 1.5s infinite;
+}
+
+.state-apto {
+  color: var(--apto);
+  text-shadow: 0 0 10px rgba(104, 211, 145, 0.3);
+}
+
+/* ============================================
+   ELEMENTOS ESPECIAIS DOUTRINAIS
+   ============================================ */
+
+/* BADGE NAVAL */
+.badge {
+  background: var(--navy-surface);
+  color: var(--text-secondary);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 1px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border: 1px solid var(--border-medium);
+  font-family: var(--font-mono);
+}
+
+/* GRADE TÁTICA */
+.tactical-grid-item {
+  position: relative;
+}
+
+.tactical-grid-item::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid rgba(66, 153, 225, 0.1);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* COMANDOS DE SISTEMA */
+.system-command {
+  position: relative;
+  font-family: var(--font-mono);
+}
+
+.system-command::before {
+  content: ">";
+  position: absolute;
+  left: -15px;
+  color: var(--convocado);
+  font-weight: bold;
+}
+
+/* ============================================
+   UTILITÁRIOS
+   ============================================ */
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+/* ============================================
+   RESPONSIVIDADE
+   ============================================ */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 16px 18px 20px;
+  }
+  
+  .app-header h1 {
+    font-size: 16px;
+  }
+  
+  .streaks-container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .guided-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .feedback {
+    left: 16px;
+    right: 16px;
+    max-width: none;
+    top: 50px;
+  }
+  
+  .nav-tabs {
+    padding: 10px 0;
+  }
+  
+  .nav-tab i {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  
+  .tab-label {
+    font-size: 8px;
+    letter-spacing: 0.8px;
+  }
+  
+  .system-insignia {
+    top: 12px;
+    right: 12px;
+    width: 20px;
+    height: 20px;
+    font-size: 8px;
+  }
+}
+
+/* ============================================
+   EFEITOS ESPECIAIS
+   ============================================ */
+
+/* BRILHO DE STATUS */
+.status-glow {
+  position: relative;
+}
+
+.status-glow::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 4px;
+  background: linear-gradient(45deg, 
+    var(--inerte), 
+    var(--apto), 
+    var(--inerte));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.status-glow:hover::after {
+  opacity: 0.1;
+}
+
+/* EFEITO DE PROFUNDIDADE NAVAL */
+.naval-depth {
+  position: relative;
+}
+
+.naval-depth::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  pointer-events: none;
+}
+
+/* ============================================
+   AJUSTES FINAIS
+   ============================================ */
+::-moz-selection {
+  background: var(--operacional);
+  color: var(--navy-deep);
+}
+
+::selection {
+  background: var(--operacional);
+  color: var(--navy-deep);
+}
+
+/* FOCO VISUAL */
+:focus-visible {
+  outline: 2px solid var(--operacional);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.1);
+}
+
+/* DISABLED STATES */
+button:disabled,
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.5);
+}
+
+/* IMPRESSÃO */
+@media print {
+  .nav-tabs,
+  .system-status-bar,
+  .system-insignia,
+  .naval-status-indicators {
+    display: none;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+  
+  .app-container {
+    padding: 20px;
+    border: 1px solid #ccc;
+  }
+}
