@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Player Gamificado - Melhoria Pessoal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    <style>
+        /* Estilos específicos para o ranking */
+        .ranking-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ranking-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            border: 1px solid var(--cyber-border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ranking-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .ranking-position {
+            font-size: 2rem;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+            color: var(--kimono-gold);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .position-1 .ranking-position {
+            color: var(--kimono-gold);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .position-2 .ranking-position {
+            color: var(--silver);
+            background: linear-gradient(45deg, #C0C0C0, #D3D3D3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .position-3 .ranking-position {
+            color: var(--bronze);
+            background: linear-gradient(45deg, #CD7F32, #A0522D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ranking-player-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .ranking-player-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .ranking-player-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .ranking-player-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .ranking-player-stat i {
+            color: var(--primary);
+        }
+
+        .ranking-trophy {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 3rem;
+            opacity: 0.1;
+            transform: rotate(15deg);
+        }
+
+        .ranking-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--cyber-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .ranking-tab {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: none;
+            color: var(--gray);
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .ranking-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .ranking-tab:hover:not(.active) {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+        }
+
+        .ranking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--cyber-border);
+        }
+
+        .ranking-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .ranking-update-info {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .ranking-user-position {
+            background: linear-gradient(135deg, var(--primary), var(--neon-blue));
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid var(--kimono-gold);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .ranking-user-position h3 {
+            margin: 0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ranking-user-position .position-badge {
+            background: white;
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .empty-ranking {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray);
+        }
+
+        .empty-ranking i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .ranking-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .ranking-filter {
+            padding: 0.25rem 0.75rem;
+            border: 1px solid var(--cyber-border);
+            border-radius: 20px;
+            background: none;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .ranking-filter.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .loading-ranking {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-ranking i {
+            font-size: 2rem;
+            color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Gradiente SVG para o anel de progresso -->
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:var(--shogun-red);stop-opacity:1" />
+                <stop offset="50%" style="stop-color:var(--neon-blue);stop-opacity:1" />
+                <stop offset="100%" style="stop-color:var(--kimono-gold);stop-opacity:1" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="app-container">
+        <!-- Cabeçalho -->
+        <header class="app-header cyber-header">
+            <h1><i class="fas fa-gamepad"></i> Player Gamificado</h1>
+            <p>Transforme hábitos em conquistas diárias</p>
+            <div class="tab-indicator">
+                <span class="active" data-tab="home" onclick="switchScreen('home')"></span>
+                <span data-tab="setup" onclick="switchScreen('setup')"></span>
+                <span data-tab="log" onclick="switchScreen('log')"></span>
+                <span data-tab="ranking" onclick="switchScreen('ranking')"></span>
+            </div>
+        </header>
+
+        <!-- Tela 1: Home (Dashboard) -->
+        <div id="home-screen" class="screen active">
+            <!-- Conteúdo existente mantido -->
+            <!-- ... -->
+        </div>
+
+        <!-- Tela 2: Configuração -->
+        <div id="setup-screen" class="screen">
+            <!-- Conteúdo existente mantido -->
+            <!-- ... -->
+        </div>
+
+        <!-- Tela 3: Log -->
+        <div id="log-screen" class="screen">
+            <!-- Conteúdo existente mantido -->
+            <!-- ... -->
+        </div>
+
+        <!-- Tela 4: Ranking -->
+        <div id="ranking-screen" class="screen">
+            <div class="ranking-container">
+                <!-- Sua posição -->
+                <div id="user-ranking-position" class="ranking-user-position" style="display: none;">
+                    <h3>
+                        <i class="fas fa-crown"></i>
+                        Sua Posição no Ranking
+                    </h3>
+                    <div class="position-badge">
+                        <span id="user-position">?</span>º lugar
+                    </div>
+                </div>
+
+                <!-- Cabeçalho do ranking -->
+                <div class="card">
+                    <div class="ranking-header">
+                        <div class="ranking-title">
+                            <i class="fas fa-trophy"></i> Ranking Global
+                        </div>
+                        <div class="ranking-update-info" id="ranking-update-info">
+                            Atualizando...
+                        </div>
+                    </div>
+
+                    <!-- Abas de ranking -->
+                    <div class="ranking-tabs">
+                        <button class="ranking-tab active" data-ranking-type="points" onclick="changeRankingType('points')">
+                            <i class="fas fa-star"></i> Pontos
+                        </button>
+                        <button class="ranking-tab" data-ranking-type="level" onclick="changeRankingType('level')">
+                            <i class="fas fa-chart-line"></i> Nível
+                        </button>
+                        <button class="ranking-tab" data-ranking-type="streak" onclick="changeRankingType('streak')">
+                            <i class="fas fa-fire"></i> Streak
+                        </button>
+                        <button class="ranking-tab" data-ranking-type="habits" onclick="changeRankingType('habits')">
+                            <i class="fas fa-tasks"></i> Hábitos
+                        </button>
+                    </div>
+
+                    <!-- Filtros de tempo -->
+                    <div class="ranking-filters">
+                        <button class="ranking-filter active" data-timeframe="all" onclick="changeRankingTimeframe('all')">
+                            Todos os tempos
+                        </button>
+                        <button class="ranking-filter" data-timeframe="month" onclick="changeRankingTimeframe('month')">
+                            Este mês
+                        </button>
+                        <button class="ranking-filter" data-timeframe="week" onclick="changeRankingTimeframe('week')">
+                            Esta semana
+                        </button>
+                        <button class="ranking-filter" data-timeframe="today" onclick="changeRankingTimeframe('today')">
+                            Hoje
+                        </button>
+                    </div>
+
+                    <!-- Lista de ranking -->
+                    <div id="ranking-list-container">
+                        <div class="loading-ranking" id="ranking-loading">
+                            <i class="fas fa-spinner loading"></i>
+                            <p>Carregando ranking...</p>
+                        </div>
+                        <div id="ranking-list" style="display: none;">
+                            <!-- Ranking será carregado aqui -->
+                        </div>
+                        <div class="empty-ranking" id="empty-ranking" style="display: none;">
+                            <i class="fas fa-trophy"></i>
+                            <h3>Nenhum jogador no ranking</h3>
+                            <p>Comece a jogar para aparecer aqui!</p>
+                        </div>
+                    </div>
+
+                    <!-- Botão de atualizar -->
+                    <button class="btn btn-primary mt-2" id="refresh-ranking" onclick="loadRanking()">
+                        <i class="fas fa-sync-alt"></i> Atualizar Ranking
+                    </button>
+                </div>
+
+                <!-- Informações sobre o ranking -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-info-circle"></i> Como Funciona o Ranking</h2>
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--gray);">
+                        <p><strong>Pontos:</strong> Baseado nos pontos totais conquistados</p>
+                        <p><strong>Nível:</strong> Baseado no nível atual do jogador</p>
+                        <p><strong>Streak:</strong> Baseado na sequência atual de dias ativos</p>
+                        <p><strong>Hábitos:</strong> Baseado no total de hábitos completados</p>
+                        <p class="mt-2"><small>O ranking é atualizado automaticamente a cada salvamento</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu de navegação inferior -->
+        <nav class="nav-tabs">
+            <a href="#" class="nav-tab active" data-screen="home">
+                <i class="fas fa-home"></i>
+                <span class="tab-label">Início</span>
+            </a>
+            <a href="#" class="nav-tab" data-screen="setup">
+                <i class="fas fa-cog"></i>
+                <span class="tab-label">Configuração</span>
+            </a>
+            <a href="#" class="nav-tab" data-screen="log">
+                <i class="fas fa-file-alt"></i>
+                <span class="tab-label">Log</span>
+            </a>
+            <a href="#" class="nav-tab" data-screen="ranking">
+                <i class="fas fa-trophy"></i>
+                <span class="tab-label">Ranking</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Modal de Modo Guiado (mantido) -->
+    <!-- ... -->
+
+    <!-- Modal de seleção/criação de jogador (mantido) -->
+    <!-- ... -->
+
+    <!-- Feedback Toast (mantido) -->
+    <!-- ... -->
+
+    <!-- JavaScript -->
+    <script>
+        // ============================================
+        // VARIÁVEIS GLOBAIS PARA RANKING
+        // ============================================
+        let rankingState = {
+            currentType: 'points',
+            currentTimeframe: 'all',
+            lastUpdate: null,
+            rankingData: [],
+            isLoadingRanking: false
+        };
+
+        // ============================================
+        // FUNÇÕES DE RANKING
+        // ============================================
+
+        async function loadRanking() {
+            if (rankingState.isLoadingRanking) return;
+            
+            try {
+                rankingState.isLoadingRanking = true;
+                showRankingLoading(true);
+                
+                // Carrega todos os jogadores
+                const players = await loadAllPlayers();
+                
+                if (!players || players.length === 0) {
+                    showEmptyRanking();
+                    return;
+                }
+                
+                // Processa os dados para ranking
+                const rankingData = processPlayersForRanking(players);
+                rankingState.rankingData = rankingData;
+                
+                // Atualiza a lista
+                updateRankingList();
+                
+                // Atualiza posição do usuário atual
+                updateUserRankingPosition();
+                
+                // Atualiza timestamp
+                rankingState.lastUpdate = new Date();
+                updateRankingTimestamp();
+                
+            } catch (error) {
+                console.error('Erro ao carregar ranking:', error);
+                showFeedback('Erro ao carregar ranking', 'danger');
+            } finally {
+                rankingState.isLoadingRanking = false;
+                showRankingLoading(false);
+            }
+        }
+
+        function processPlayersForRanking(players) {
+            // Filtra jogadores válidos
+            const validPlayers = players.filter(p => p && p.player);
+            
+            // Ordena com base no tipo atual
+            return validPlayers.sort((a, b) => {
+                switch (rankingState.currentType) {
+                    case 'points':
+                        return (b.totalPoints || 0) - (a.totalPoints || 0);
+                    case 'level':
+                        return (b.level || 1) - (a.level || 1);
+                    case 'streak':
+                        return (b.streaks?.global || 0) - (a.streaks?.global || 0);
+                    case 'habits':
+                        const aHabits = a.habits?.filter(h => h.completed).length || 0;
+                        const bHabits = b.habits?.filter(h => h.completed).length || 0;
+                        return bHabits - aHabits;
+                    default:
+                        return (b.totalPoints || 0) - (a.totalPoints || 0);
+                }
+            }).slice(0, 50); // Limita a 50 posições
+        }
+
+        function updateRankingList() {
+            const container = document.getElementById('ranking-list');
+            const emptyRanking = document.getElementById('empty-ranking');
+            
+            if (!rankingState.rankingData || rankingState.rankingData.length === 0) {
+                container.style.display = 'none';
+                emptyRanking.style.display = 'block';
+                return;
+            }
+            
+            container.innerHTML = '';
+            emptyRanking.style.display = 'none';
+            
+            rankingState.rankingData.forEach((player, index) => {
+                const position = index + 1;
+                const playerCard = createRankingCard(player, position);
+                container.appendChild(playerCard);
+            });
+            
+            container.style.display = 'block';
+        }
+
+        function createRankingCard(player, position) {
+            const card = document.createElement('div');
+            card.className = `ranking-card position-${position}`;
+            
+            if (position <= 3) {
+                card.classList.add(`position-${position}`);
+            }
+            
+            // Calcula valores para exibição
+            const points = player.totalPoints || 0;
+            const level = player.level || 1;
+            const streak = player.streaks?.global || 0;
+            const completedHabits = player.habits?.filter(h => h.completed).length || 0;
+            const totalHabits = player.habits?.length || 0;
+            
+            // Valor principal baseado no tipo de ranking
+            let mainValue, mainIcon, mainLabel;
+            switch (rankingState.currentType) {
+                case 'points':
+                    mainValue = points;
+                    mainIcon = 'fas fa-star';
+                    mainLabel = 'pontos';
+                    break;
+                case 'level':
+                    mainValue = level;
+                    mainIcon = 'fas fa-chart-line';
+                    mainLabel = 'nível';
+                    break;
+                case 'streak':
+                    mainValue = streak;
+                    mainIcon = 'fas fa-fire';
+                    mainLabel = 'dias';
+                    break;
+                case 'habits':
+                    mainValue = `${completedHabits}/${totalHabits}`;
+                    mainIcon = 'fas fa-tasks';
+                    mainLabel = 'hábitos';
+                    break;
+            }
+            
+            card.innerHTML = `
+                ${position <= 3 ? `<div class="ranking-trophy"><i class="fas fa-trophy"></i></div>` : ''}
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="ranking-position">${position}</div>
+                    <div class="ranking-player-info">
+                        <div class="ranking-player-name">${player.player}</div>
+                        <div class="ranking-player-stats">
+                            <div class="ranking-player-stat">
+                                <i class="${mainIcon}"></i>
+                                <span>${mainValue} ${mainLabel}</span>
+                            </div>
+                            <div class="ranking-player-stat">
+                                <i class="fas fa-crown"></i>
+                                <span>Nível ${level}</span>
+                            </div>
+                            <div class="ranking-player-stat">
+                                <i class="fas fa-fire"></i>
+                                <span>${streak} dias</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Destaca o jogador atual
+            if (state.playerData && player.player === state.playerData.player) {
+                card.style.border = '2px solid var(--kimono-gold)';
+                card.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.3)';
+            }
+            
+            return card;
+        }
+
+        function updateUserRankingPosition() {
+            if (!state.playerData || !rankingState.rankingData || rankingState.rankingData.length === 0) {
+                document.getElementById('user-ranking-position').style.display = 'none';
+                return;
+            }
+            
+            const userIndex = rankingState.rankingData.findIndex(
+                p => p.player === state.playerData.player
+            );
+            
+            if (userIndex === -1) {
+                document.getElementById('user-ranking-position').style.display = 'none';
+                return;
+            }
+            
+            const userPosition = userIndex + 1;
+            document.getElementById('user-position').textContent = userPosition;
+            document.getElementById('user-ranking-position').style.display = 'flex';
+            
+            // Atualiza badge com ícone baseado na posição
+            const badge = document.querySelector('.position-badge');
+            if (userPosition === 1) {
+                badge.innerHTML = `<i class="fas fa-crown"></i> ${userPosition}º lugar`;
+                badge.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
+            } else if (userPosition <= 3) {
+                badge.innerHTML = `${userPosition}º lugar`;
+                badge.style.background = 'linear-gradient(135deg, #C0C0C0, #A0A0A0)';
+            } else if (userPosition <= 10) {
+                badge.innerHTML = `${userPosition}º lugar`;
+                badge.style.background = 'linear-gradient(135deg, #CD7F32, #8B4513)';
+            } else {
+                badge.innerHTML = `${userPosition}º lugar`;
+                badge.style.background = 'white';
+            }
+        }
+
+        function changeRankingType(type) {
+            rankingState.currentType = type;
+            
+            // Atualiza abas ativas
+            document.querySelectorAll('.ranking-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.rankingType === type) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Recarrega ranking
+            loadRanking();
+        }
+
+        function changeRankingTimeframe(timeframe) {
+            rankingState.currentTimeframe = timeframe;
+            
+            // Atualiza filtros ativos
+            document.querySelectorAll('.ranking-filter').forEach(filter => {
+                filter.classList.remove('active');
+                if (filter.dataset.timeframe === timeframe) {
+                    filter.classList.add('active');
+                }
+            });
+            
+            // Nota: A API atual não suporta timeframe, mas a estrutura está pronta
+            // Recarrega ranking
+            loadRanking();
+        }
+
+        function showRankingLoading(show) {
+            const loading = document.getElementById('ranking-loading');
+            const list = document.getElementById('ranking-list');
+            
+            if (show) {
+                loading.style.display = 'block';
+                list.style.display = 'none';
+                document.getElementById('empty-ranking').style.display = 'none';
+            } else {
+                loading.style.display = 'none';
+            }
+        }
+
+        function showEmptyRanking() {
+            const loading = document.getElementById('ranking-loading');
+            const list = document.getElementById('ranking-list');
+            const empty = document.getElementById('empty-ranking');
+            
+            loading.style.display = 'none';
+            list.style.display = 'none';
+            empty.style.display = 'block';
+            document.getElementById('user-ranking-position').style.display = 'none';
+        }
+
+        function updateRankingTimestamp() {
+            const element = document.getElementById('ranking-update-info');
+            if (!element || !rankingState.lastUpdate) return;
+            
+            const now = new Date();
+            const diffMs = now - rankingState.lastUpdate;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            let text;
+            if (diffMins < 1) {
+                text = 'Agora mesmo';
+            } else if (diffMins === 1) {
+                text = 'Há 1 minuto';
+            } else if (diffMins < 60) {
+                text = `Há ${diffMins} minutos`;
+            } else {
+                const diffHours = Math.floor(diffMins / 60);
+                text = `Há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+            }
+            
+            element.textContent = `Atualizado ${text}`;
+        }
+
+        // ============================================
+        // ATUALIZAÇÃO DAS FUNÇÕES EXISTENTES
+        // ============================================
+
+        // Adiciona o tab indicator para ranking
+        function switchScreen(screenName) {
+            // ... código existente ...
+            
+            // Atualiza indicador
+            document.querySelectorAll('.tab-indicator span').forEach((span, index) => {
+                span.classList.remove('active');
+                const tabNames = ['home', 'setup', 'log', 'ranking'];
+                if (index === tabNames.indexOf(screenName)) {
+                    span.classList.add('active');
+                }
+            });
+            
+            // Atualiza UI específica da tela
+            if (screenName === 'ranking') {
+                // Carrega ranking quando abrir a tela
+                loadRanking();
+            }
+            
+            // ... resto do código existente ...
+        }
+
+        // Atualiza setupEventListeners para incluir ranking
+        function setupEventListeners() {
+            // ... código existente ...
+            
+            // Ranking - Atualizar automaticamente ao salvar progresso
+            const originalSaveDailyProgress = window.saveDailyProgress;
+            window.saveDailyProgress = async function() {
+                await originalSaveDailyProgress();
+                // Atualiza ranking se estiver na tela de ranking
+                if (document.getElementById('ranking-screen').classList.contains('active')) {
+                    loadRanking();
+                }
+            };
+            
+            // Configura botão de refresh
+            document.getElementById('refresh-ranking').addEventListener('click', loadRanking);
+        }
+
+        // Atualiza initApp para carregar ranking se necessário
+        async function initApp() {
+            // ... código existente ...
+            
+            // Atualiza ranking a cada 5 minutos
+            setInterval(() => {
+                if (document.getElementById('ranking-screen').classList.contains('active')) {
+                    loadRanking();
+                }
+            }, 5 * 60 * 1000);
+            
+            // Atualiza timestamp do ranking a cada minuto
+            setInterval(updateRankingTimestamp, 60000);
+        }
+
+        // ============================================
+        // FUNÇÃO loadAllPlayers ATUALIZADA
+        // ============================================
+        async function loadAllPlayers() {
+            try {
+                // Se a API tiver endpoint específico para listar todos os jogadores
+                return await apiRequest("/players", {method:"GET"});
+            } catch (error) {
+                console.error('Erro ao carregar jogadores:', error);
+                // Fallback: tenta carregar alguns jogadores conhecidos
+                try {
+                    const fallbackPlayers = [];
+                    // Você pode adicionar aqui algum fallback se necessário
+                    return fallbackPlayers;
+                } catch (fallbackError) {
+                    return [];
+                }
+            }
+        }
+    </script>
+</body>
+</html>
